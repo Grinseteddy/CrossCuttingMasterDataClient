@@ -22,7 +22,7 @@ public class MasterDataClientController {
         try {
 
             MasterData answer = new MasterData(Integer.valueOf(index));
-            logger.info("Master data valid response: "+String.valueOf(answer.SmallLetter)+ " "+String.valueOf(answer.Capital));
+            logger.info("Master data valid response: "+String.valueOf(answer.smallLetter)+ " "+String.valueOf(answer.capital));
             return answer;
 
         } catch (Exception e) {

@@ -3,6 +3,13 @@ package com.annegretjunker.servicepattern.masterdataclient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 @RefreshScope
 public class MasterData {
@@ -10,38 +17,57 @@ public class MasterData {
     private char[] smallAlphabet;
     private char [] capitalAlphabet;
 
-    public String SmallLetter;
-    public String Capital;
+    public String smallLetter;
+    public String capital;
 
     @Value("${smallalphabeturl:http://localhost:8083/small}")
-    private String smallalphabeturl;
+    private static String smallalphabeturl="http://localhost:8083/small";
 
     @Value("${capitalalphabeturl:http://localhost:8083/capital}")
-    private String capitalalphabeturl;
+    private static String capitalalphabeturl="http://localhost:8083/capital";
 
+    @Value("${index:1}")
+    static int index;
 
-
-    MasterData(int index) {
+    MasterData(int index) throws Exception {
         if (smallAlphabet==null) {
             initializeSmallAlphabet();
         }
         if (capitalAlphabet==null) {
             initializeCapitalAlphabet();
         }
-        SmallLetter=String.valueOf(smallAlphabet[index]);
-        Capital=String.valueOf(capitalAlphabet[index]);
+        smallLetter=String.valueOf(smallAlphabet[index]);
+        capital=String.valueOf(capitalAlphabet[index]);
     }
 
-    public String getCapital() {
-        return Capital;
+    private String getCapital() {
+        return capital;
     }
 
-    public String getSmallLetter() {
-        return SmallLetter;
+    private String getSmallLetter() {
+        return smallLetter;
     }
 
-    public void initializeSmallAlphabet() {
-        smallAlphabet= new char[]{'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+    public void initializeSmallAlphabet() throws Exception {
+        
+        try {
+            URL url=new URL(smallalphabeturl);
+            HttpURLConnection connection=(HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("GET");
+            if (connection.getResponseCode() != 200) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "According masterdata not found");
+            }
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    (connection.getInputStream())));
+            String output;
+            output = br.readLine();
+            //TODO think about timeouts
+            connection.disconnect();
+            smallAlphabet=output.toCharArray();
+            return;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Full master data not available");
+        }
 
     }
 
@@ -55,14 +81,7 @@ public class MasterData {
     }
 
     public void setSmallAlphabet(char[] smallAlphabet) {
+        this.smallAlphabet= smallAlphabet;
 
-    }
-
-    public char[] getCapitalAlphabet() {
-        return capitalAlphabet;
-    }
-
-    public char[] getSmallAlphabet() {
-        return smallAlphabet;
     }
 }
