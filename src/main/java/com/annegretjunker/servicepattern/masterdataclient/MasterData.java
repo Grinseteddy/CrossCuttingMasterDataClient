@@ -14,6 +14,11 @@ import java.net.URL;
 @RefreshScope
 public class MasterData {
 
+    enum KindOfAlphabet {
+        SMALLLETTER,
+        CAPITALLETTER
+    }
+
     private char[] smallAlphabet;
     private char [] capitalAlphabet;
 
@@ -31,10 +36,10 @@ public class MasterData {
 
     MasterData(int index) throws Exception {
         if (smallAlphabet==null) {
-            initializeSmallAlphabet();
+            initializeAlphabet(KindOfAlphabet.SMALLLETTER);
         }
         if (capitalAlphabet==null) {
-            initializeCapitalAlphabet();
+            initializeAlphabet(KindOfAlphabet.CAPITALLETTER);
         }
         smallLetter=String.valueOf(smallAlphabet[index]);
         capital=String.valueOf(capitalAlphabet[index]);
@@ -48,11 +53,15 @@ public class MasterData {
         return smallLetter;
     }
 
-    public void initializeSmallAlphabet() throws Exception {
-        
+    public void initializeAlphabet(KindOfAlphabet kindOfAlphabet) throws Exception {
+
         try {
-            URL url=new URL(smallalphabeturl);
-            HttpURLConnection connection=(HttpURLConnection)url.openConnection();
+            URL url;
+            if (kindOfAlphabet == KindOfAlphabet.SMALLLETTER)
+                url = new URL(smallalphabeturl);
+            else
+                url = new URL(capitalalphabeturl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             if (connection.getResponseCode() != 200) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "According masterdata not found");
@@ -63,18 +72,16 @@ public class MasterData {
             output = br.readLine();
             //TODO think about timeouts
             connection.disconnect();
-            smallAlphabet=output.toCharArray();
+            if (kindOfAlphabet == KindOfAlphabet.SMALLLETTER)
+                smallAlphabet = output.toCharArray();
+            else
+                capitalAlphabet = output.toCharArray();
             return;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Full master data not available");
         }
-
     }
 
-    public void initializeCapitalAlphabet() {
-        capitalAlphabet=new char[]{'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
-
-    }
 
     public void setCapitalAlphabet(char[] capitalAlphabet) {
         this.capitalAlphabet = capitalAlphabet;
