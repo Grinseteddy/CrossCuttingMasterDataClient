@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.BufferedReader;
@@ -19,8 +21,8 @@ public class MasterData {
         CAPITALLETTER
     }
 
-    private char[] smallAlphabet;
-    private char [] capitalAlphabet;
+    public char[] smallAlphabet;
+    public char [] capitalAlphabet;
 
     public String smallLetter;
     public String capital;
@@ -81,7 +83,6 @@ public class MasterData {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Full master data not available");
         }
     }
-
 
     public void setCapitalAlphabet(char[] capitalAlphabet) {
         this.capitalAlphabet = capitalAlphabet;
